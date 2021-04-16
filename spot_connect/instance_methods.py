@@ -12,8 +12,10 @@ the instance.
 MIT License 2020
 """
 
-import sys, boto3 
+import sys
+import boto3
 from spot_connect import ec2_methods, sutils, interactive
+
 
 def run_script(instance, user_name, script, cmd=False, port=22, kp_dir=None, return_output=False):
     '''
@@ -26,39 +28,51 @@ def run_script(instance, user_name, script, cmd=False, port=22, kp_dir=None, ret
     - cmd : if True, script string is treated as an individual argument 
     - port : port to use to connect to the instance 
     '''
-    
-    if kp_dir is None: 
+
+    if kp_dir is None:
         kp_dir = sutils.get_default_kp_dir()
 
-    if cmd: 
+    if cmd:
         commands = script
-    else:   
+    else:
         commands = open(script, 'r').read().replace('\r', '')
-        
-    client = ec2_methods.connect_to_instance(instance['PublicIpAddress'],kp_dir+'/'+instance['KeyName'],username=user_name,port=port)
-    
-    session = client.get_transport().open_session()
-    session.set_combine_stderr(True)                                           # Combine the error message and output message channels
 
-    session.exec_command(commands)                                             # Execute a command or .sh script (unix or linux console)
-    stdout = session.makefile()                                                # Collect the output 
-    
+    client = ec2_methods.connect_to_instance(
+        instance['PublicDnsName'], kp_dir + '/' + instance['KeyName'], username=user_name, port=port)
+
+    session = client.get_transport().open_session()
+    # Combine the error message and output message channels
+    session.set_combine_stderr(True)
+
+    # Execute a command or .sh script (unix or linux console)
+    session.exec_command(commands)
+    # Collect the output
+    stdout = session.makefile()
+
     try:
-        if return_output: output = ''
+        if return_output:
+            output = ''
 
         for line in stdout:
-            if return_output: output+=line.rstrip()+'\n'
-            else: print(line.rstrip(), flush=True)                                   # Show the output 
+            if return_output:
+                output += line.rstrip() + '\n'
+            else:
+                # Show the output
+                print(line.rstrip(), flush=True)
 
     except (KeyboardInterrupt, SystemExit):
-        print(sys.stderr, 'Ctrl-C, stopping', flush=True)                      # Keyboard interrupt 
-    client.close()                                                             # Close the connection    
+        # Keyboard interrupt
+        print(sys.stderr, 'Ctrl-C, stopping', flush=True)
+    # Close the connection
+    client.close()
 
-    if return_output: return True, output     
-    else: return True
+    if return_output:
+        return True, output
+    else:
+        return True
 
 
-def active_shell(instance, user_name, port=22, kp_dir=None): 
+def active_shell(instance, user_name, port=22, kp_dir=None):
     '''
     Leave a shell active
     __________
@@ -66,15 +80,16 @@ def active_shell(instance, user_name, port=22, kp_dir=None):
     - instance : dict. Response dictionary from ec2 instance describe_instances method 
     - user_name : string. SSH username for accessing instance, default usernames for AWS images can be found at https://alestic.com/2014/01/ec2-ssh-username/
     - port : port to use to connect to the instance 
-    '''    
+    '''
 
-    if kp_dir is None: 
+    if kp_dir is None:
         kp_dir = sutils.get_default_kp_dir()
-    
-    client = ec2_methods.connect_to_instance(instance['PublicIpAddress'],kp_dir+'/'+instance['KeyName'],username=user_name,port=port)
 
-    console = client.invoke_shell()                                            
-    console.keep_this = client                                                
+    client = ec2_methods.connect_to_instance(
+        instance['PublicDnsName'], kp_dir + '/' + instance['KeyName'], username=user_name, port=port)
+
+    console = client.invoke_shell()
+    console.keep_this = client
 
     session = console.get_transport().open_session()
     session.get_pty()
@@ -83,11 +98,11 @@ def active_shell(instance, user_name, port=22, kp_dir=None):
     try:
         interactive.interactive_shell(session)
 
-    except: 
+    except:
         print('Logged out of interactive session.')
 
-    session.close() 
-    return True 
+    session.close()
+    return True
 
 
 def upload_to_ec2(instance, user_name, files, remote_dir='.', kp_dir=None, verbose=False):
@@ -101,26 +116,28 @@ def upload_to_ec2(instance, user_name, files, remote_dir='.', kp_dir=None, verbo
     - remote_dir : '.'  string.The directory on the instance where the files will be uploaded to 
     '''
 
-    if kp_dir is None: 
+    if kp_dir is None:
         kp_dir = sutils.get_default_kp_dir()
 
-    client = ec2_methods.connect_to_instance(instance['PublicIpAddress'],kp_dir+'/'+instance['KeyName'],username=user_name,port=22)
+    client = ec2_methods.connect_to_instance(
+        instance['PublicDnsName'], kp_dir + '/' + instance['KeyName'], username=user_name, port=22)
     if verbose:
         print('Connected. Uploading files...')
     stfp = client.open_sftp()
 
-    try: 
-    	for f in files: 
+    try:
+        for f in files:
             if verbose:
                 print('Uploading %s' % str(f.split('\\')[-1]))
-            stfp.put(f, remote_dir+'/'+f.split('\\')[-1], callback=sutils.printTotals, confirm=True)
+            stfp.put(f, remote_dir + '/' + f.split('\\')
+                     [-1], callback=sutils.printTotals, confirm=True)
 
     except Exception as e:
         raise e
 
     if verbose:
         print('Uploaded to %s' % remote_dir)
-    return True 
+    return True
 
 
 def download_from_ec2(instance, username, get, put='.', kp_dir=None):
@@ -134,33 +151,34 @@ def download_from_ec2(instance, username, get, put='.', kp_dir=None):
     - put : str or list of str. Folder to place the files in `get` 
     '''
 
-    if kp_dir is None: 
+    if kp_dir is None:
         kp_dir = sutils.get_default_kp_dir()
 
-    client = boto3.client('ec2', region_name='us-west-2')
-    client = ec2_methods.connect_to_instance(instance['PublicIpAddress'],kp_dir+'/'+instance['KeyName'],username=username,port=22)
+    client = boto3.client('ec2', region_name='us-east-1')
+    client = ec2_methods.connect_to_instance(
+        instance['PublicDnsName'], kp_dir + '/' + instance['KeyName'], username=username, port=22)
 
     stfp = client.open_sftp()
 
-    for idx, file in enumerate(get): 
-        try: 
-            stfp.get(file,put[idx], callback=sutils.printTotals)
-        except Exception as e: 
+    for idx, file in enumerate(get):
+        try:
+            stfp.get(file, put[idx], callback=sutils.printTotals)
+        except Exception as e:
             print(file)
             raise e
-    return True 
+    return True
 
 
 def terminate_instance(instance_id):
     '''Terminate  an instance using the instance ID'''
-    
-    if type(instance_id) is str: 
+
+    if type(instance_id) is str:
         instances = [instance_id]
 
-    elif type(instance_id) is list: 
+    elif type(instance_id) is list:
         instances = instance_id
 
-    else: 
+    else:
         raise Exception('instance_id arg must be str or list')
 
     ec2 = boto3.resource('ec2')

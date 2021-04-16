@@ -228,7 +228,7 @@ def get_spot_instance(spotid,
 
     #sys.stdout.write('Got instance: '+str(instance['InstanceId'])+'['+str(instance['State']['Name'])+']')
     sys.stdout.write('Got instance: ' + str(instance['InstanceId']) + '[' + str(
-        instance['State']['Name']) + ']' + ' / DNS: ' + str(instance['PublicDnsName']))
+        instance['State']['Name']) + ']' + '\ndns: ' + str(instance['PublicDnsName']))
     sys.stdout.flush()
 
     if str(instance['State']['Name']) == 'terminated':

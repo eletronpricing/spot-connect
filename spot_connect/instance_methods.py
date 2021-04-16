@@ -17,7 +17,7 @@ import boto3
 from spot_connect import ec2_methods, sutils, interactive
 
 
-def run_script(instance, user_name, script, cmd=False, port=22, kp_dir=None, return_output=False):
+def run_script(instance, user_name, script, cmd=True, port=22, kp_dir=None, return_output=False):
     '''
     Run a script on the the given instance 
     __________

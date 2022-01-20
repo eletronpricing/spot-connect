@@ -26,7 +26,7 @@ import numpy as np
 from path import Path
 from IPython.display import clear_output
 from datetime import datetime
-
+from tabulate import tabulate
 
 root = Path(os.path.dirname(os.path.abspath(__file__)))
 
@@ -238,7 +238,7 @@ def add_profile(profile_dict, instance_type, image_id, image_name, bid_price, mi
     return profile_dict
 
 
-def reset_profiles(price_increase=1.15):
+def reset_profiles(price_increase=1.00):
     '''Reset the profile image, region, and set what % of the price you want to set as maximum bid for all instance types (remember you can always submit a custom price when making spot-requests).'''
     assert price_increase >= 1
 
@@ -412,6 +412,67 @@ class CurrentIdLog:
         return fid
 
 
+def print_region_prices(instance_type, regiao='us-east-1'):
+    """printa na tela os atuais precos spot da regiao
+
+    Args:
+        instance_type ([string]): tipo da instancia
+        regiao ([string]): regiao
+    """
+
+    client = boto3.client('ec2', region_name=regiao)
+
+    print("\nInstancia: %s" % instance_type)
+
+    results = []
+
+    client = boto3.client('ec2', region_name=regiao)
+    prices = client.describe_spot_price_history(
+        InstanceTypes=[instance_type],
+        ProductDescriptions=['Linux/UNIX', 'Linux/UNIX (Amazon VPC)'],
+        StartTime=(datetime.datetime.now() -
+                   datetime.timedelta(hours=5)).isoformat(),
+        MaxResults=100
+    )
+
+    for price in prices["SpotPriceHistory"]:
+        results.append((price["AvailabilityZone"],
+                        price["SpotPrice"], price["Timestamp"]))
+
+    df = pd.DataFrame(results, columns=['Regiao', 'Preco', "Timestamp"])
+    df['Preco'] = df['Preco'].str[:6]
+    df = df.sort_values('Regiao')
+
+    idx = df.groupby("Regiao")['Timestamp'].transform(
+        max) == df['Timestamp']
+
+    print(tabulate(df[idx][['Regiao', 'Preco']],
+                   headers='keys', tablefmt='pretty', showindex=False))
+
+
+def print_ami_images(regiao='us-east-1'):
+    """printa na tela uma lista das imagens disponiveis na regiao informada
+
+    Args:
+        regiao (str, optional): string com nome da regiao que contem as imagens. Defaults to 'us-east-1'.
+    """
+
+    ec2_client = boto3.client('ec2', region_name=regiao)
+    images = ec2_client.describe_images(Owners=['self'])
+
+    results = []
+
+    for image in images["Images"]:
+        if 'Ubuntu' in image["Name"]:
+            results.append((image["Name"],
+                            image["ImageId"]))
+
+    df = pd.DataFrame(results, columns=['Name', 'ImageId'])
+    df = df.sort_values('Name')
+
+    print(tabulate(df, headers='keys', tablefmt='pretty', showindex=False))
+
+
 # Load the data needed for the module
 username_dictionary = {'Linux': 'ec2-user',
                        'Ubuntu': 'ubuntu',
@@ -421,3 +482,6 @@ spot_instance_pricing = pd.read_csv(
     pull_root() + '/data/spot_instance_pricing.csv')
 ami_data = pd.read_csv(pull_root() + '/data/ami_data.csv')
 ami_data['username'] = ami_data['image_name'].apply(lambda s: find_username(s))
+
+if __name__ == '__main__':
+    reset_profiles()

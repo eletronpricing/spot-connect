@@ -199,7 +199,7 @@ def select_region():
     for i, r in enumerate(ami_data['region'].unique()):
         print(i, r)
     region_idx = int(
-        input('Enter the number of the region you want to set the profiles to'))
+        input('Enter the number of the region you want to set the profiles to:\n'))
     region = list(ami_data['region'].unique())[region_idx]
     clear_output()
     return region
@@ -210,7 +210,7 @@ def select_image(region):
     for i, r in enumerate(image_list):
         print(i, r)
     image_idx = int(
-        input('Enter the number of the image you want to set the profiles to'))
+        input('Enter the number of the image you want to set the profiles to:\n'))
     image_id = list(ami_data.loc[ami_data['region'] == region, 'image_id'])[
         image_idx]
     image_name = list(ami_data.loc[ami_data['region'] == region, 'image_name'])[
@@ -223,7 +223,7 @@ def select_image(region):
 
 def add_profile(profile_dict, instance_type, image_id, image_name, bid_price, min_price, region='us-east-1', zone='a', username='ubuntu'):
     profile_dict[instance_type] = {
-        'efs_mount': str(True),
+        'efs_mount': str(False),
         'firewall_ingress': ('tcp', 22, 22, '0.0.0.0/0'),
         'image_id': image_id,
         'image_name': image_name,
@@ -245,10 +245,10 @@ def reset_profiles(price_increase=1.00):
     region = select_region()
     image_id, image_name, username = select_image(region)
 
-    region_name = region.split(')')[0] + ')'
-    region_code = region.split(')')[1]
+    #region_name = region.split(')')[0] + ')'
+    region_code = region  # .split(')')
     zone_code = 'a'
-    spot_instance_pricing.loc[spot_instance_pricing['region'] == region_name]
+    spot_instance_pricing.loc[spot_instance_pricing['region'] == region_code]
 
     profile_dict = {}
     for tup in spot_instance_pricing.itertuples():
@@ -494,6 +494,43 @@ def reset_ami_images(regiao='us-east-1'):
                 f.write(str(i) + ',' + image["Name"] + ',' +
                         image["ImageId"] + ',' + regiao + '\n')
                 i = i + 1
+
+
+def get_ec2_instance_types(region_name='us-east-1'):
+    '''Yield all available EC2 instance types in region <region_name>'''
+    ec2 = boto3.client('ec2', region_name=region_name)
+
+    describe_args = {}
+
+    while True:
+        describe_result = ec2.describe_instance_types(**describe_args)
+
+        for i in describe_result['InstanceTypes']:
+            yield (i['InstanceType'], i['VCpuInfo']['DefaultVCpus'])
+
+        if 'NextToken' not in describe_result:
+            break
+        describe_args['NextToken'] = describe_result['NextToken']
+
+
+def reset_instance_list(region_name='us-east-1'):
+
+    instance_file_path = 'data/spot_instance_pricing.csv'
+
+    lista_tipos = ['c5', 'm5.', 't2.micro']
+
+    lista_instancia = sorted(get_ec2_instance_types(region_name))
+
+    i = 0
+
+    with open(instance_file_path, 'w') as f:
+        f.write(',instance_type,linux_price,windows_price,region\n')
+        for ec2_type in lista_instancia:
+            for item in lista_tipos:
+                if item in ec2_type[0] and ec2_type[1] > 40:
+                    f.write(str(i) + ',' + ec2_type[0] + ',' +
+                            '$0.0000' + ',' + 'N/A*' + ',' + region_name + '\n')
+                    i = i + 1
 
 
 # Load the data needed for the module

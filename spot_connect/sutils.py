@@ -473,6 +473,29 @@ def print_ami_images(regiao='us-east-1'):
     print(tabulate(df, headers='keys', tablefmt='pretty', showindex=False))
 
 
+def reset_ami_images(regiao='us-east-1'):
+    """reseta arquivo com lista de imagens disponiveis na regiao informada
+
+    Args:
+        regiao (str, optional): string com nome da regiao que contem as imagens. Defaults to 'us-east-1'.
+    """
+
+    ami_file_path = 'data/ami_data.csv'
+
+    ec2_client = boto3.client('ec2', region_name=regiao)
+    images = ec2_client.describe_images(Owners=['self'])
+
+    i = 0
+
+    with open(ami_file_path, 'w') as f:
+        f.write(',image_name,image_id,region\n')
+        for image in images["Images"]:
+            if 'Ubuntu' in image["Name"]:
+                f.write(str(i) + ',' + image["Name"] + ',' +
+                        image["ImageId"] + ',' + regiao + '\n')
+                i = i + 1
+
+
 # Load the data needed for the module
 username_dictionary = {'Linux': 'ec2-user',
                        'Ubuntu': 'ubuntu',
@@ -482,6 +505,7 @@ spot_instance_pricing = pd.read_csv(
     pull_root() + '/data/spot_instance_pricing.csv')
 ami_data = pd.read_csv(pull_root() + '/data/ami_data.csv')
 ami_data['username'] = ami_data['image_name'].apply(lambda s: find_username(s))
+
 
 if __name__ == '__main__':
     reset_profiles()

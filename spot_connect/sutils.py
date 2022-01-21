@@ -3,9 +3,9 @@ Author: Carlos Valcarcel <carlos.d.valcarcel.w@gmail.com>
 
 This file is part of spot-connect
 
-Toolbox for working with AWS ec2-instances: 
+Toolbox for working with AWS ec2-instances:
 
-the sutils submodule contains general-use python functions that are needed to 
+the sutils submodule contains general-use python functions that are needed to
 build out the other sub-modules in spot-connect.
 
 MIT License 2020
@@ -25,7 +25,7 @@ import pandas as pd
 import numpy as np
 from path import Path
 from IPython.display import clear_output
-from datetime import datetime
+from datetime import datetime, timedelta
 from tabulate import tabulate
 
 root = Path(os.path.dirname(os.path.abspath(__file__)))
@@ -78,7 +78,7 @@ def load_profiles():
     with open(profile, 'r') as f:
         profiles = ast.literal_eval(f.read())
 
-    #print('Profiles loaded, you can edit profiles in '+str(profile))
+    # print('Profiles loaded, you can edit profiles in '+str(profile))
 
     return profiles
 
@@ -88,7 +88,7 @@ def save_profiles(profiles):
     profile_file = [f for f in list(absoluteFilePaths(
         pull_root() + '/data/')) if f.split('\\')[-1] == 'profiles.txt'][0]
 
-    #ptosave = ast.literal_eval(profile_str)
+    # ptosave = ast.literal_eval(profile_str)
     print(profile_file)
 
     with open(profile_file, 'w') as f:
@@ -130,7 +130,7 @@ def change_default_image(image, deactive_warning=True):
 
 
 def show_instances():
-    client = boto3.client('ec2', region_name='us-west-2')
+    client = boto3.client('ec2', region_name='us-east-1')
     print('Instances (by Key names):')
     for i in [res['Instances'][0] for res in client.describe_instances()['Reservations']]:
         print('     - "' + i['KeyName'].split('-')[1] + '" Type: ' +
@@ -196,32 +196,115 @@ def find_username(s):
 
 
 def select_region():
+
+    results = []
+
     for i, r in enumerate(ami_data['region'].unique()):
-        print(i, r)
-    region_idx = int(
-        input('Enter the number of the region you want to set the profiles to:\n'))
-    region = list(ami_data['region'].unique())[region_idx]
-    clear_output()
+        # print(i, r)
+        results.append({
+            'indice': i,
+            'regiao': r
+        }
+        )
+
+    df = pd.DataFrame(results)
+
+    check_indice = True
+
+    while check_indice:
+        try:
+
+            print(tabulate(df, headers='keys', tablefmt='pretty', showindex=False))
+            region_idx = int(
+                input('Insira o indice da regiao desejada: '))
+            region = list(ami_data['region'].unique())[region_idx]
+            clear_output()
+            check_indice = False
+        except Exception:
+            print('\nindice nao localizado. Tente novamente.\n')
+
     return region
 
 
-def select_image(region):
+def select_instance_type(region='us-east-1'):
+
+    results = []
+
+    instance_list = spot_instance_pricing.loc[spot_instance_pricing['region']
+                                              == region, 'instance_type']
+    for i, r in enumerate(instance_list):
+        # print(i, r, '(' + str(list(
+        #     spot_instance_pricing.loc[spot_instance_pricing['region'] == region, 'vcpus'])[i]) + ')')
+
+        results.append({
+            'indice': i,
+            'instancia': r,
+            'cpu': list(spot_instance_pricing.loc[spot_instance_pricing['region'] == region, 'vcpus'])[i]
+        }
+        )
+
+    df = pd.DataFrame(results)
+
+    check_indice = True
+
+    while check_indice:
+
+        try:
+            print(tabulate(df, headers='keys', tablefmt='pretty', showindex=False))
+            instance_idx = int(
+                input('Insira o indice da instancia desejada: '))
+            instance_cpu = list(spot_instance_pricing.loc[spot_instance_pricing['region'] == region, 'vcpus'])[
+                instance_idx]
+            instance_name = list(spot_instance_pricing.loc[spot_instance_pricing['region'] == region, 'instance_type'])[
+                instance_idx]
+            clear_output()
+            check_indice = False
+        except Exception:
+            print('\nindice nao localizado. Tente novamente.\n')
+
+    return instance_name, instance_cpu
+
+
+def select_image(region='us-east-1'):
+
+    results = []
+
     image_list = ami_data.loc[ami_data['region'] == region, 'image_name']
+
     for i, r in enumerate(image_list):
-        print(i, r)
-    image_idx = int(
-        input('Enter the number of the image you want to set the profiles to:\n'))
-    image_id = list(ami_data.loc[ami_data['region'] == region, 'image_id'])[
-        image_idx]
-    image_name = list(ami_data.loc[ami_data['region'] == region, 'image_name'])[
-        image_idx]
-    username = list(ami_data.loc[ami_data['region'] == region, 'username'])[
-        image_idx]
-    clear_output()
+
+        results.append({
+            'indice': i,
+            'imagem': r
+        }
+        )
+
+    df = pd.DataFrame(results)
+
+    check_indice = True
+
+    while check_indice:
+        try:
+
+            print(tabulate(df, headers='keys',
+                           tablefmt='pretty', showindex=False))
+            image_idx = int(
+                input('Insira o indice da imagem desejada: '))
+            image_id = list(ami_data.loc[ami_data['region'] == region, 'image_id'])[
+                image_idx]
+            image_name = list(ami_data.loc[ami_data['region'] == region, 'image_name'])[
+                image_idx]
+            username = list(ami_data.loc[ami_data['region'] == region, 'username'])[
+                image_idx]
+            clear_output()
+            check_indice = False
+        except Exception:
+            print('\nindice nao localizado. Tente novamente.\n')
+
     return image_id, image_name, username
 
 
-def add_profile(profile_dict, instance_type, image_id, image_name, bid_price, min_price, region='us-east-1', zone='a', username='ubuntu'):
+def add_profile(profile_dict, instance_type, image_id, image_name, bid_price, min_price, no_cpus, region='us-east-1', zone='a', username='ubuntu'):
     profile_dict[instance_type] = {
         'efs_mount': str(False),
         'firewall_ingress': ('tcp', 22, 22, '0.0.0.0/0'),
@@ -230,6 +313,7 @@ def add_profile(profile_dict, instance_type, image_id, image_name, bid_price, mi
         'instance_type': str(instance_type),
         'price': str(bid_price),
         'min_price': str(min_price),
+        'vcpus': str(no_cpus),
         'region': str(region),
         'zone': str(zone),
         'scripts': [],
@@ -238,14 +322,14 @@ def add_profile(profile_dict, instance_type, image_id, image_name, bid_price, mi
     return profile_dict
 
 
-def reset_profiles(price_increase=1.00):
+def reset_profiles(price_increase=1.15):
     '''Reset the profile image, region, and set what % of the price you want to set as maximum bid for all instance types (remember you can always submit a custom price when making spot-requests).'''
     assert price_increase >= 1
 
     region = select_region()
     image_id, image_name, username = select_image(region)
 
-    #region_name = region.split(')')[0] + ')'
+    # region_name = region.split(')')[0] + ')'
     region_code = region  # .split(')')
     zone_code = 'a'
     spot_instance_pricing.loc[spot_instance_pricing['region'] == region_code]
@@ -257,7 +341,8 @@ def reset_profiles(price_increase=1.00):
             continue
         instance_price = float(re.findall(
             '([0-9]*\.[0-9]*)', tup.linux_price)[0])
-        bid_price = instance_price * price_increase
+        no_cpus = tup.vcpus
+        bid_price = round(instance_price * price_increase, 4)
 
         profile_dict = add_profile(profile_dict,
                                    tup.instance_type,
@@ -265,6 +350,7 @@ def reset_profiles(price_increase=1.00):
                                    image_name,
                                    bid_price,
                                    instance_price,
+                                   no_cpus,
                                    region_code,
                                    zone_code,
                                    username)
@@ -278,11 +364,11 @@ def count_cpus_by_type():
 
 def split_workloads(n_jobs, workload, wrkdir=None, filename=None):
     '''Split the workload into n_jobs which are saved as pickle files in the wrkdir under the filename<i> for each job i
-    This is meant to be used to create the upload material for distributed jobs. 
+    This is meant to be used to create the upload material for distributed jobs.
     __________
     parameters
-    - n_jobs : int. number of files to split the workload into 
-    - workload : list. The items that will be split and pickled 
+    - n_jobs : int. number of files to split the workload into
+    - workload : list. The items that will be split and pickled
     - wrkdir : str. The path to store the files for each job. If no directory is submitted the working directory will be printed.
     - filename : str. The prefix of each job file, the default title is "current_workload"
     '''
@@ -412,7 +498,7 @@ class CurrentIdLog:
         return fid
 
 
-def print_region_prices(instance_type, regiao='us-east-1'):
+def print_region_prices_online(instance_type, regiao='us-east-1'):
     """printa na tela os atuais precos spot da regiao
 
     Args:
@@ -430,8 +516,8 @@ def print_region_prices(instance_type, regiao='us-east-1'):
     prices = client.describe_spot_price_history(
         InstanceTypes=[instance_type],
         ProductDescriptions=['Linux/UNIX', 'Linux/UNIX (Amazon VPC)'],
-        StartTime=(datetime.datetime.now() -
-                   datetime.timedelta(hours=5)).isoformat(),
+        StartTime=(datetime.now() -
+                   timedelta(hours=5)).isoformat(),
         MaxResults=100
     )
 
@@ -450,7 +536,7 @@ def print_region_prices(instance_type, regiao='us-east-1'):
                    headers='keys', tablefmt='pretty', showindex=False))
 
 
-def print_ami_images(regiao='us-east-1'):
+def print_ami_images_online(regiao='us-east-1'):
     """printa na tela uma lista das imagens disponiveis na regiao informada
 
     Args:
@@ -473,14 +559,14 @@ def print_ami_images(regiao='us-east-1'):
     print(tabulate(df, headers='keys', tablefmt='pretty', showindex=False))
 
 
-def reset_ami_images(regiao='us-east-1'):
+def update_ami_images(regiao='us-east-1'):
     """reseta arquivo com lista de imagens disponiveis na regiao informada
 
     Args:
         regiao (str, optional): string com nome da regiao que contem as imagens. Defaults to 'us-east-1'.
     """
 
-    ami_file_path = 'data/ami_data.csv'
+    ami_file_path = 'spot_connect/data/ami_data.csv'
 
     ec2_client = boto3.client('ec2', region_name=regiao)
     images = ec2_client.describe_images(Owners=['self'])
@@ -513,24 +599,64 @@ def get_ec2_instance_types(region_name='us-east-1'):
         describe_args['NextToken'] = describe_result['NextToken']
 
 
-def reset_instance_list(region_name='us-east-1'):
+def get_ec2_instance_region_avgprice(instance_type, regiao='us-east-1'):
+    """retorna lista com valor medio dos precos spot da regiao nos ultimos 7 dias
 
-    instance_file_path = 'data/spot_instance_pricing.csv'
+    Args:
+        instance_type ([string]): tipo da instancia
+        regiao ([string]): regiao
+    """
 
-    lista_tipos = ['c5', 'm5.', 't2.micro']
+    client = boto3.client('ec2', region_name=regiao)
+
+    client = boto3.client('ec2', region_name=regiao)
+    prices = client.describe_spot_price_history(
+        InstanceTypes=[instance_type],
+        ProductDescriptions=['Linux/UNIX', 'Linux/UNIX (Amazon VPC)'],
+        StartTime=(datetime.now() -
+                   timedelta(days=7)).isoformat(),
+        MaxResults=100
+    )
+
+    i = 0
+    somaprecos = 0
+
+    for price in prices["SpotPriceHistory"]:
+        somaprecos = float(price["SpotPrice"]) + somaprecos
+        i = i + 1
+
+    return round(somaprecos / i, 4)
+
+
+def update_instance_list(region_name='us-east-1'):
+
+    instance_file_path = 'spot_connect/data/spot_instance_pricing.csv'
+
+    lista_tipos = ['c5', 'c6i.', 'm5.', 't2.micro']
 
     lista_instancia = sorted(get_ec2_instance_types(region_name))
 
     i = 0
 
     with open(instance_file_path, 'w') as f:
-        f.write(',instance_type,linux_price,windows_price,region\n')
+        f.write(',instance_type,vcpus,linux_price,windows_price,region\n')
         for ec2_type in lista_instancia:
             for item in lista_tipos:
-                if item in ec2_type[0] and ec2_type[1] > 40:
-                    f.write(str(i) + ',' + ec2_type[0] + ',' +
-                            '$0.0000' + ',' + 'N/A*' + ',' + region_name + '\n')
+                if item in ec2_type[0] and ec2_type[1] > 40 and 'metal' not in ec2_type[0]:
+                    f.write(str(i) + ',' + ec2_type[0] + ',' + str(ec2_type[1]) + ',' + '$' +
+                            str(get_ec2_instance_region_avgprice(ec2_type[0], region_name)) + ',' + 'N/A*' + ',' + region_name + '\n')
                     i = i + 1
+
+
+def update_listas(region_name='us-east-1'):
+
+    print('atualizando lista de imagens...')
+    update_ami_images(region_name)
+
+    print('atualizando lista de instancias e precos medios...')
+    update_instance_list(region_name)
+
+    print('finalizado!')
 
 
 # Load the data needed for the module
@@ -545,4 +671,7 @@ ami_data['username'] = ami_data['image_name'].apply(lambda s: find_username(s))
 
 
 if __name__ == '__main__':
-    reset_profiles()
+    # reset_profiles()
+    # reset_listas()
+    # print(select_instance_type())
+    select_instance_type()

@@ -498,7 +498,7 @@ class CurrentIdLog:
         return fid
 
 
-def print_region_prices_online(instance_type, regiao='us-east-1'):
+def get_region_prices_online(instance_type, regiao='us-east-1'):
     """printa na tela os atuais precos spot da regiao
 
     Args:
@@ -529,11 +529,36 @@ def print_region_prices_online(instance_type, regiao='us-east-1'):
     df['Preco'] = df['Preco'].str[:6]
     df = df.sort_values('Regiao')
 
+    # idx = df.groupby("Regiao")['Timestamp'].transform(
+    #     max) == df['Timestamp']
+
+    # print(tabulate(df[idx][['Regiao', 'Preco']],
+    #                headers='keys', tablefmt='pretty', showindex=False))
+
+    return df
+
+
+def select_availability_zone(instance_type, regiao='us-east-1'):
+
+    df = get_region_prices_online(instance_type, regiao)
+
     idx = df.groupby("Regiao")['Timestamp'].transform(
         max) == df['Timestamp']
 
-    print(tabulate(df[idx][['Regiao', 'Preco']],
-                   headers='keys', tablefmt='pretty', showindex=False))
+    lista_zonas = ['a', 'b', 'c', 'd', 'f']
+    check_zona = True
+
+    while check_zona:
+
+        print(tabulate(df[idx][['Regiao', 'Preco']],
+                       headers='keys', tablefmt='pretty', showindex=False))
+
+        azone_code = input('Insira a letra da zona desejada: ')
+
+        if azone_code in lista_zonas:
+            return azone_code
+        else:
+            print(f'\nA zona deve ser uma letra no intervalo {lista_zonas}\n')
 
 
 def print_ami_images_online(regiao='us-east-1'):
@@ -674,4 +699,4 @@ if __name__ == '__main__':
     # reset_profiles()
     # reset_listas()
     # print(select_instance_type())
-    select_instance_type()
+    select_availability_zone('c5.18xlarge')

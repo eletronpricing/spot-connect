@@ -545,6 +545,7 @@ def select_availability_zone(instance_type, regiao='us-east-1'):
     idx = df.groupby("Regiao")['Timestamp'].transform(
         max) == df['Timestamp']
 
+    df_idx = df[idx][['Regiao', 'Preco']]
     lista_zonas = ['a', 'b', 'c', 'd', 'f']
     check_zona = True
 
@@ -556,7 +557,10 @@ def select_availability_zone(instance_type, regiao='us-east-1'):
         azone_code = input('Insira a letra da zona desejada: ')
 
         if azone_code in lista_zonas:
-            return azone_code
+            regiao_az = regiao + azone_code
+            preco = df_idx.loc[df_idx['Regiao']
+                               == regiao_az, 'Preco'].values[0]
+            return azone_code, preco
         else:
             print(f'\nA zona deve ser uma letra no intervalo {lista_zonas}\n')
 
@@ -706,5 +710,5 @@ if __name__ == '__main__':
     # update_listas()
     # update_ami_images()
     # print(select_instance_type())
-    # print(select_availability_zone('c6i.32xlarge'))
-    reset_profiles()
+    print(select_availability_zone('c6i.32xlarge'))
+    # reset_profiles()

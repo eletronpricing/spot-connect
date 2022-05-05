@@ -21,7 +21,6 @@ MIT License
 
 from path import Path
 import argparse
-import sys
 import time
 import os
 
@@ -159,7 +158,6 @@ def main():                                                     # Main execution
                                                           kp_dir=kp_dir, using_instance_id=using_id)  # Launch or connect to the spot instance under the given name
     except Exception as e:
         raise e
-        sys.exit(1)
 
     # If a filesystem was provided and we want to mount an EFS
     if profile['efs_mount']:
@@ -171,7 +169,7 @@ def main():                                                     # Main execution
                 fs_name, instance, new_mount=args.newmount, region=profile['region'])
         except Exception as e:
             raise e
-            sys.exit(1)
+
         print('Connecting to instance to link EFS...')
         instance_methods.run_script(instance, profile['username'], bash_scripts.compose_mount_script(
             filesystem_dns), kp_dir=kp_dir, cmd=True)

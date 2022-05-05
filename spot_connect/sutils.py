@@ -413,7 +413,7 @@ class CurrentIdLog:
         We reset by day because call numbers are reset in the API system after a short ammount of time.
         __________
         parameters
-        - logdir : str. the directory to load or store the "current_session_ids.pickle" file which contains the IDs that have been used today so far. 
+        - logdir : str. the directory to load or store the "current_session_ids.pickle" file which contains the IDs that have been used today so far.
         '''
         self.curid = None
         self.ids = None
@@ -571,12 +571,15 @@ def print_ami_images_online(regiao='us-east-1'):
     ec2_client = boto3.client('ec2', region_name=regiao)
     images = ec2_client.describe_images(Owners=['self'])
 
+    lista_filtro = ['DECOMP', 'NEWAVE']
+
     results = []
 
     for image in images["Images"]:
-        if 'Ubuntu' in image["Name"]:
-            results.append((image["Name"],
-                            image["ImageId"]))
+        for item in lista_filtro:
+            if item in image["Name"]:
+                results.append((image["Name"],
+                                image["ImageId"]))
 
     df = pd.DataFrame(results, columns=['Name', 'ImageId'])
     df = df.sort_values('Name')
@@ -593,6 +596,8 @@ def update_ami_images(regiao='us-east-1'):
 
     ami_file_path = 'spot_connect/data/ami_data.csv'
 
+    lista_filtro = ['DECOMP', 'NEWAVE']
+
     ec2_client = boto3.client('ec2', region_name=regiao)
     images = ec2_client.describe_images(Owners=['self'])
 
@@ -601,10 +606,11 @@ def update_ami_images(regiao='us-east-1'):
     with open(ami_file_path, 'w') as f:
         f.write(',image_name,image_id,region\n')
         for image in images["Images"]:
-            if 'Ubuntu' in image["Name"]:
-                f.write(str(i) + ',' + image["Name"] + ',' +
-                        image["ImageId"] + ',' + regiao + '\n')
-                i = i + 1
+            for item in lista_filtro:
+                if item in image["Name"]:
+                    f.write(str(i) + ',' + image["Name"] + ',' +
+                            image["ImageId"] + ',' + regiao + '\n')
+                    i = i + 1
 
 
 def get_ec2_instance_types(region_name='us-east-1'):
@@ -697,6 +703,8 @@ ami_data['username'] = ami_data['image_name'].apply(lambda s: find_username(s))
 
 if __name__ == '__main__':
     # reset_profiles()
-    # reset_listas()
+    # update_listas()
+    # update_ami_images()
     # print(select_instance_type())
-    select_availability_zone('c5.18xlarge')
+    # print(select_availability_zone('c6i.32xlarge'))
+    reset_profiles()

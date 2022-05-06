@@ -667,7 +667,7 @@ def update_instance_list(region_name='us-east-1'):
 
     instance_file_path = 'spot_connect/data/spot_instance_pricing.csv'
 
-    lista_tipos = ['c5', 'c6i.', 'm5.', 't2.micro']
+    lista_tipos = ['c5', 'c6i.', 'm5.']
 
     lista_instancia = sorted(get_ec2_instance_types(region_name))
 
@@ -707,8 +707,8 @@ ami_data['username'] = ami_data['image_name'].apply(lambda s: find_username(s))
 
 if __name__ == '__main__':
     # reset_profiles()
-    # update_listas()
     # update_ami_images()
-    # print(select_instance_type())
-    print(select_availability_zone('c6i.32xlarge'))
+    update_instance_list()
+    # print(select_availability_zone('c6i.32xlarge'))
     # reset_profiles()
+    # print(pull_root())

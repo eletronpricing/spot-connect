@@ -339,8 +339,11 @@ def reset_profiles(price_increase=1.15):
 
         if 'N/A' in tup.linux_price:
             continue
-        instance_price = float(re.findall(
-            '([0-9]*\.[0-9]*)', tup.linux_price)[0])
+        try:
+            instance_price = float(re.findall(
+                '([0-9]*\.[0-9]*)', tup.linux_price)[0])
+        except:
+            instance_price = 0
         no_cpus = tup.vcpus
         bid_price = round(instance_price * price_increase, 4)
 
@@ -538,7 +541,7 @@ def get_region_prices_online(instance_type, regiao='us-east-1'):
     return df
 
 
-def select_availability_zone(instance_type, regiao='us-east-1'):
+def select_availability_zone_by_price(instance_type, regiao='us-east-1'):
 
     df = get_region_prices_online(instance_type, regiao)
 
@@ -660,7 +663,12 @@ def get_ec2_instance_region_avgprice(instance_type, regiao='us-east-1'):
         somaprecos = float(price["SpotPrice"]) + somaprecos
         i = i + 1
 
-    return round(somaprecos / i, 4)
+    try:
+        precomedio = round(somaprecos / i, 4)
+    except:
+        precomedio = 0
+
+    return precomedio
 
 
 def update_instance_list(region_name='us-east-1'):
@@ -681,6 +689,22 @@ def update_instance_list(region_name='us-east-1'):
                     f.write(str(i) + ',' + ec2_type[0] + ',' + str(ec2_type[1]) + ',' + '$' +
                             str(get_ec2_instance_region_avgprice(ec2_type[0], region_name)) + ',' + 'N/A*' + ',' + region_name + '\n')
                     i = i + 1
+
+
+def update_instance_list_full(region_name='us-east-1'):
+
+    instance_file_path = 'spot_connect/data/spot_instance_pricing.csv'
+
+    lista_instancia = sorted(get_ec2_instance_types(region_name))
+
+    i = 0
+
+    with open(instance_file_path, 'w') as f:
+        f.write(',instance_type,vcpus,linux_price,windows_price,region\n')
+        for ec2_type in lista_instancia:
+            f.write(str(i) + ',' + ec2_type[0] + ',' + str(ec2_type[1]) + ',' + '$' +
+                    str(get_ec2_instance_region_avgprice(ec2_type[0], region_name)) + ',' + 'N/A*' + ',' + region_name + '\n')
+            i = i + 1
 
 
 def update_listas(region_name='us-east-1'):
@@ -706,9 +730,8 @@ ami_data['username'] = ami_data['image_name'].apply(lambda s: find_username(s))
 
 
 if __name__ == '__main__':
-    # reset_profiles()
+    reset_profiles()
     # update_ami_images()
-    update_instance_list()
-    # print(select_availability_zone('c6i.32xlarge'))
-    # reset_profiles()
-    # print(pull_root())
+    # update_instance_list_full()
+    # print(select_availability_zone_by_price('c6i.32xlarge'))
+    # update_instance_list_full()

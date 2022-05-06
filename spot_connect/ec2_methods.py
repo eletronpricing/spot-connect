@@ -195,6 +195,12 @@ def get_spot_instance(spotid,
                 if spot_req['State'] == 'failed':
                     raise Exception('Spot Request Failed')
 
+                # If the request status is one of below, cancels request and exit
+                if spot_req['Status']['Code'] in ['price-too-low', 'capacity-not-available']:
+                    client.cancel_spot_instance_requests(
+                        SpotInstanceRequestIds=[spot_req_id])
+                    sys.exit(spot_req['Status']['Message'])
+
                 # If an instance ID was returned with the spot request we exit the while loop
                 if 'InstanceId' in spot_req:
                     instance_id = spot_req['InstanceId']
@@ -269,14 +275,12 @@ def check_instance_initialization(instance_id, client=None, region=None, instanc
             sys.stdout.write(".")
             sys.stdout.flush()
 
-            # print(client.describe_instance_status(InstanceIds=[instance_id]))
+            while client.describe_instance_status(
+                    InstanceIds=[instance_id])['InstanceStatuses'] == []:
+                time.sleep(instance_wait_sleep)
 
-            if len(client.describe_instance_status(InstanceIds=[instance_id])['InstanceStatuses'][0]) != 0:
-
-                instance_status = client.describe_instance_status(InstanceIds=[instance_id])[
-                    'InstanceStatuses'][0]['InstanceStatus']['Status']
-            else:
-                instance_status = 'loading...'
+            instance_status = client.describe_instance_status(InstanceIds=[instance_id])[
+                'InstanceStatuses'][0]['InstanceStatus']['Status']
 
             if instance_status != 'initializing':
                 instance_up = True

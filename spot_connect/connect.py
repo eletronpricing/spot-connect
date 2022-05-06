@@ -26,7 +26,12 @@ import os
 
 root = Path(os.path.dirname(os.path.abspath(__file__)))
 
-from spot_connect import sutils, ec2_methods, iam_methods, efs_methods, instance_methods, bash_scripts
+import sutils
+import ec2_methods
+import iam_methods
+import efs_methods
+import instance_methods
+import bash_scripts
 
 
 def main():                                                     # Main execution
@@ -64,7 +69,7 @@ def main():                                                     # Main execution
     parser.add_argument(
         '-s', '--script', help='script path (equivalent to user-date run on connection)', default='')
     parser.add_argument(
-        '-un', '--username', help='username to use to log into the instance, default is ec2-user', default='')
+        '-un', '--username', help='username to use to log into the instance, default is ubuntu', default='ubuntu')
 
     parser.add_argument('-f', '--filesystem',
                         help='elastic file system creation token', default='')
@@ -211,3 +216,7 @@ def main():                                                     # Main execution
         # termination overrrides everything else
         instance_methods.terminate_instance(instance['InstanceId'])
         print('Instance %s has been terminated' % str(spot_identifier))
+
+
+if __name__ == "__main__":
+    main()

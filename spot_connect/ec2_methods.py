@@ -196,7 +196,7 @@ def get_spot_instance(spotid,
                     raise Exception('Spot Request Failed')
 
                 # If the request status is one of below, cancels request and exit
-                if spot_req['Status']['Code'] in ['price-too-low', 'capacity-not-available']:
+                if spot_req['Status']['Code'] in ['price-too-low', 'capacity-not-available', 'constraint-not-fulfillable', 'az-group-constraint', 'launch-group-constraint', 'placement-group-constraint']:
                     client.cancel_spot_instance_requests(
                         SpotInstanceRequestIds=[spot_req_id])
                     sys.exit(spot_req['Status']['Message'])

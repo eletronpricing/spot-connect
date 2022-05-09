@@ -20,8 +20,8 @@ from path import Path
 
 root = Path(os.path.dirname(os.path.abspath(__file__)))
 
-from spot_connect import sutils, ec2_methods, iam_methods, efs_methods, instance_methods, bash_scripts
-from spot_connect.bash_scripts import update_git_repo
+from spotconnect import sutils, ec2_methods, iam_methods, efs_methods, instance_methods, bash_scripts
+from spotconnect.bash_scripts import update_git_repo
 
 
 class SpotInstance:

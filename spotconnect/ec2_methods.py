@@ -20,7 +20,7 @@ from path import Path
 
 root = Path(os.path.dirname(os.path.abspath(__file__)))
 
-from spot_connect import iam_methods
+from spotconnect import iam_methods
 
 
 def get_spot_instance(spotid,

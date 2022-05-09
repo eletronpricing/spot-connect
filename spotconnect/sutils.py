@@ -730,8 +730,8 @@ ami_data['username'] = ami_data['image_name'].apply(lambda s: find_username(s))
 
 
 if __name__ == '__main__':
-    reset_profiles()
+    # reset_profiles()
     # update_ami_images()
     # update_instance_list_full()
     # print(select_availability_zone_by_price('c6i.32xlarge'))
-    # update_instance_list_full()
+    select_region()

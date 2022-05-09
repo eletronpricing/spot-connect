@@ -14,7 +14,7 @@ MIT License 2020
 
 import sys
 import boto3
-from spot_connect import ec2_methods, sutils, interactive
+from spotconnect import ec2_methods, sutils, interactive
 
 
 def run_script(instance, user_name, script, cmd=True, port=22, kp_dir=None, return_output=False):

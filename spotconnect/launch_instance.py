@@ -20,11 +20,13 @@ MIT License
 """
 
 from path import Path
-import argparse
 import time
 import os
+import sys
 
 root = Path(os.path.dirname(os.path.abspath(__file__)))
+
+sys.path.insert(0, root)
 
 import sutils
 import ec2_methods

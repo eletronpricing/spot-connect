@@ -136,12 +136,17 @@ def launch_instance(name='', instanceid='', keypair='', securitygroup='', instan
 
     if upload != '':
         files_to_upload = []
-        for file in upload.split(','):
-            files_to_upload.append(os.path.abspath(file))
-        instance_methods.upload_to_ec2(
-            instance, profile['username'], files_to_upload, remote_dir=remotepath)
 
-        print('Time to Upload: %s' % str(time.time() - st))
+        try:
+            for file in upload.split(','):
+                files_to_upload.append(os.path.abspath(file))
+            instance_methods.upload_to_ec2(
+                instance, profile['username'], files_to_upload, remote_dir=remotepath)
+
+            print('Time to Upload: %s' % str(time.time() - st))
+        except Exception as e:
+            print(e)
+            print("An error ocurred while trying to upload to remote path")
 
     st = time.time()
 

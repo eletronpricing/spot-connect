@@ -356,7 +356,6 @@ def add_profile(profile_dict, instance_type, image_id, image_name, bid_price, mi
         'efs_mount': str(False),
         'firewall_ingress': ('tcp', 22, 22, '0.0.0.0/0'),
         'image_id': image_id,
-        'image_name': image_name,
         'instance_type': str(instance_type),
         'price': str(bid_price),
         'min_price': str(min_price),
@@ -397,7 +396,6 @@ def reset_profiles(price_increase=1.15):
         profile_dict = add_profile(profile_dict,
                                    tup.instance_type,
                                    image_id,
-                                   image_name,
                                    bid_price,
                                    instance_price,
                                    no_cpus,
@@ -792,9 +790,9 @@ ami_data['username'] = ami_data['image_name'].apply(lambda s: find_username(s))
 
 
 if __name__ == '__main__':
-    # reset_profiles()
+    reset_profiles()
     # update_ami_images()
     # update_instance_list_full()
     # print(select_availability_zone_by_price('c6i.32xlarge'))
     # print(get_price('c5.24xlarge', regiao='us-east-1', azone_code='a'))
-    select_instance_type_filter(region='us-east-1', cpu_min=40, cpu_max=40)
+    #select_instance_type_filter(region='us-east-1', cpu_min=40, cpu_max=40)

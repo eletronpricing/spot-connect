@@ -253,17 +253,21 @@ def select_instance_type_filter(region='us-east-1', cpu_min=1, cpu_max=999):
 
     while check_indice:
 
-        try:
-            print(tabulate(df, headers='keys', tablefmt='pretty', showindex=False))
-            instance_idx = int(
-                input('Insira o indice da instancia desejada: '))
+        print(tabulate(df, headers='keys', tablefmt='pretty', showindex=False))
+        instance_idx = int(
+            input('Insira o indice da instancia desejada: '))
+
+        check_idx = instance_idx in df.indice
+
+        if check_idx:
+
             instance_cpu = list(spot_instance_pricing.loc[spot_instance_pricing['region'] == region, 'vcpus'])[
                 instance_idx]
             instance_name = list(spot_instance_pricing.loc[spot_instance_pricing['region'] == region, 'instance_type'])[
                 instance_idx]
             clear_output()
             check_indice = False
-        except Exception:
+        else:
             print('\nindice nao localizado. Tente novamente.\n')
 
     return instance_name, instance_cpu
@@ -793,4 +797,4 @@ if __name__ == '__main__':
     # update_instance_list_full()
     # print(select_availability_zone_by_price('c6i.32xlarge'))
     # print(get_price('c5.24xlarge', regiao='us-east-1', azone_code='a'))
-    select_instance_type_filter(region='us-east-1', cpu_min=36, cpu_max=40)
+    select_instance_type_filter(region='us-east-1', cpu_min=40, cpu_max=40)

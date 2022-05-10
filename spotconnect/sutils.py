@@ -351,7 +351,7 @@ def select_image(region='us-east-1'):
     return image_id, image_name, username
 
 
-def add_profile(profile_dict, instance_type, image_id, image_name, bid_price, min_price, no_cpus, region='us-east-1', zone='a', username='ubuntu'):
+def add_profile(profile_dict, instance_type, image_id, bid_price, min_price, no_cpus, region='us-east-1', zone='a', username='ubuntu'):
     profile_dict[instance_type] = {
         'efs_mount': str(False),
         'firewall_ingress': ('tcp', 22, 22, '0.0.0.0/0'),

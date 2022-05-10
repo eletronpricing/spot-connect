@@ -226,6 +226,49 @@ def select_region():
     return region
 
 
+def select_instance_type_filter(region='us-east-1', cpu_min=1, cpu_max=999):
+
+    results = []
+
+    instance_list = spot_instance_pricing.loc[spot_instance_pricing['region']
+                                              == region, 'instance_type']
+    for i, r in enumerate(instance_list):
+        # print(i, r, '(' + str(list(
+        #     spot_instance_pricing.loc[spot_instance_pricing['region'] == region, 'vcpus'])[i]) + ')')
+
+        results.append({
+            'indice': i,
+            'instancia': r,
+            'cpu': list(spot_instance_pricing.loc[spot_instance_pricing['region'] == region, 'vcpus'])[i]
+        }
+        )
+
+    df = pd.DataFrame(results)
+
+    # filtra resultados
+    df = df.loc[(df['cpu'] >= cpu_min) & (df['cpu'] <= cpu_max)]
+    df = df.sort_values(by=['cpu'], ascending=True)
+
+    check_indice = True
+
+    while check_indice:
+
+        try:
+            print(tabulate(df, headers='keys', tablefmt='pretty', showindex=False))
+            instance_idx = int(
+                input('Insira o indice da instancia desejada: '))
+            instance_cpu = list(spot_instance_pricing.loc[spot_instance_pricing['region'] == region, 'vcpus'])[
+                instance_idx]
+            instance_name = list(spot_instance_pricing.loc[spot_instance_pricing['region'] == region, 'instance_type'])[
+                instance_idx]
+            clear_output()
+            check_indice = False
+        except Exception:
+            print('\nindice nao localizado. Tente novamente.\n')
+
+    return instance_name, instance_cpu
+
+
 def select_instance_type(region='us-east-1'):
 
     results = []
@@ -541,6 +584,21 @@ def get_region_prices_online(instance_type, regiao='us-east-1'):
     return df
 
 
+def get_price(instance_type, regiao='us-east-1', azone_code='a'):
+
+    df = get_region_prices_online(instance_type, regiao)
+
+    idx = df.groupby("Regiao")['Timestamp'].transform(
+        max) == df['Timestamp']
+
+    df_idx = df[idx][['Regiao', 'Preco']]
+
+    regiao_az = regiao + azone_code
+    preco = df_idx.loc[df_idx['Regiao']
+                       == regiao_az, 'Preco'].values[0]
+    return preco
+
+
 def select_availability_zone_by_price(instance_type, regiao='us-east-1'):
 
     df = get_region_prices_online(instance_type, regiao)
@@ -734,4 +792,4 @@ if __name__ == '__main__':
     # update_ami_images()
     # update_instance_list_full()
     # print(select_availability_zone_by_price('c6i.32xlarge'))
-    select_region()
+    select_instance_type_filter('us-east-1', cpu_min=70, cpu_max=100)

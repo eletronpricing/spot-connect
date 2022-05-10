@@ -554,7 +554,7 @@ def get_region_prices_online(instance_type, regiao='us-east-1'):
 
     client = boto3.client('ec2', region_name=regiao)
 
-    print("\nInstancia: %s" % instance_type)
+    # print("\nInstancia: %s" % instance_type)
 
     results = []
 
@@ -792,4 +792,4 @@ if __name__ == '__main__':
     # update_ami_images()
     # update_instance_list_full()
     # print(select_availability_zone_by_price('c6i.32xlarge'))
-    select_instance_type_filter('us-east-1', cpu_min=70, cpu_max=100)
+    print(get_price('c5.24xlarge', regiao='us-east-1', azone_code='a'))

@@ -154,9 +154,11 @@ def get_package_kp_dir():
     kpfile = [f for f in list(absoluteFilePaths(
         os.path.join(pull_root(), 'data'))) if os.path.basename(f) == 'key_pair_default_dir.txt'][0]
     with open(kpfile, 'r') as f:
-        default_path = f.read()
-        f.close()
-    return default_path
+        list_dirs = f.readlines()
+
+    for default_path in list_dirs:
+        if os.path.isdir(default_path):
+            return default_path
 
 
 def get_default_kp_dir():
@@ -171,7 +173,6 @@ def set_default_kp_dir(directory: str):
         os.path.join(pull_root(), 'data'))) if os.path.basename(f) == 'key_pair_default_dir.txt'][0]
     with open(kpfile, 'w') as f:
         f.write(directory)
-        f.close()
     print('Default path has been set to ' + kpfile)
 
 
@@ -790,7 +791,7 @@ ami_data['username'] = ami_data['image_name'].apply(lambda s: find_username(s))
 
 
 if __name__ == '__main__':
-    reset_profiles()
+    print(get_package_kp_dir())
     # update_ami_images()
     # update_instance_list_full()
     # print(select_availability_zone_by_price('c6i.32xlarge'))

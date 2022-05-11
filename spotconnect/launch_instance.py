@@ -94,7 +94,7 @@ def launch_instance(name='', instanceid='', keypair='', keypair_dir='', security
         # For the profile we need a tuple of the security group ID and the security group name.
         profile['security_group'] = (sg['GroupId'], securitygroup)
 
-    if keypair_dir != '':
+    if keypair_dir == '':
 
         try:
             kp_dir = sutils.get_package_kp_dir()

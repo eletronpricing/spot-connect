@@ -106,7 +106,7 @@ def active_shell(instance, user_name, port=22, kp_dir=None):
     return True
 
 
-def upload_to_ec2(instance, user_name, files, remote_dir='.', kp_dir=None, verbose=False):
+def upload_to_ec2(instance, user_name, files, remote_dir='.', kp_dir='', verbose=False):
     '''
     Upload files directly to an EC2 instance. Speed depends on internet connection and not instance type. 
     __________
@@ -117,11 +117,11 @@ def upload_to_ec2(instance, user_name, files, remote_dir='.', kp_dir=None, verbo
     - remote_dir : '.'  string.The directory on the instance where the files will be uploaded to 
     '''
 
-    if kp_dir is None:
+    if kp_dir == '':
         kp_dir = sutils.get_default_kp_dir()
 
     client = ec2_methods.connect_to_instance(
-        instance['PublicDnsName'], kp_dir + '/' + instance['KeyName'], username=user_name, port=22)
+        instance['PublicDnsName'], os.path.join(kp_dir, instance['KeyName']), username=user_name, port=22)
     if verbose:
         print('Connected. Uploading files...')
     stfp = client.open_sftp()

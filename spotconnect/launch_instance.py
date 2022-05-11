@@ -146,7 +146,7 @@ def launch_instance(name='', instanceid='', keypair='', keypair_dir='', security
             for file in upload.split(','):
                 files_to_upload.append(os.path.abspath(file))
             instance_methods.upload_to_ec2(
-                instance, profile['username'], files_to_upload, remote_dir=remotepath)
+                instance, profile['username'], files_to_upload, remote_dir=remotepath, kp_dir=kp_dir)
 
             print('Time to Upload: %s' % str(time.time() - st))
         except Exception as e:

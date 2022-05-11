@@ -153,12 +153,13 @@ def get_package_kp_dir():
     '''Get the key-pair directory'''
     kpfile = [f for f in list(absoluteFilePaths(
         os.path.join(pull_root(), 'data'))) if os.path.basename(f) == 'key_pair_default_dir.txt'][0]
+
     with open(kpfile, 'r') as f:
         list_dirs = f.readlines()
 
     for default_path in list_dirs:
-        if os.path.isdir(default_path):
-            return default_path
+        if os.path.isdir(default_path.strip()):
+            return default_path.strip()
 
 
 def get_default_kp_dir():

@@ -39,7 +39,7 @@ import bash_scripts
 profiles = sutils.load_profiles()
 
 
-def launch_instance(name='', instanceid='', keypair='', securitygroup='', instanceprofile='', profilespot=list(profiles.keys())[0], choices=profiles.keys(), efsmount=False, firewall='', imageid='', price='', region='us-east-1', zone='a', script='', username='ubuntu', filesystem='', newmount=False, upload='', remotepath='', activeprompt=False, terminate=False, monitoring=True):
+def launch_instance(name='', instanceid='', keypair='', keypair_dir='', securitygroup='', instanceprofile='', profilespot=list(profiles.keys())[0], choices=profiles.keys(), efsmount=False, firewall='', imageid='', price='', region='us-east-1', zone='a', script='', username='ubuntu', filesystem='', newmount=False, upload='', remotepath='', activeprompt=False, terminate=False, monitoring=True):
 
     profile = profiles[profilespot]
 
@@ -94,16 +94,21 @@ def launch_instance(name='', instanceid='', keypair='', securitygroup='', instan
         # For the profile we need a tuple of the security group ID and the security group name.
         profile['security_group'] = (sg['GroupId'], securitygroup)
 
-    try:
-        kp_dir = sutils.get_package_kp_dir()
-        if kp_dir == '':
-            raise Exception
-        print('Default key-pair directory is "%s"' % kp_dir)
-    except:
-        kp_dir = input(
-            'Please select a default directory in which to save your key-pairs: ')
-        sutils.set_default_kp_dir(kp_dir)
-        print('You can change the default key-pair directory using spot_connect.sutils.set_default_kp_dir(<dir>)' % kp_dir)
+    if keypair_dir != '':
+
+        try:
+            kp_dir = sutils.get_package_kp_dir()
+            if kp_dir == '':
+                raise Exception
+            print('Default key-pair directory is "%s"' % kp_dir)
+        except:
+            kp_dir = input(
+                'Please select a default directory in which to save your key-pairs: ')
+            sutils.set_default_kp_dir(kp_dir)
+            print('You can change the default key-pair directory using spot_connect.sutils.set_default_kp_dir(<dir>)' % kp_dir)
+
+    else:
+        kp_dir = keypair_dir
 
     # Add a forward slash to the kp_dir
     if kp_dir[-1] != '/':

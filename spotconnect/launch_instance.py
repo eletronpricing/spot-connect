@@ -175,6 +175,8 @@ def launch_instance(name='', instanceid='', keypair='', securitygroup='', instan
         instance_methods.terminate_instance(instance['InstanceId'])
         print('Instance %s has been terminated' % str(spot_identifier))
 
+    return instance
+
 
 if __name__ == "__main__":
     launch_instance(name='teste15', profilespot='t2.micro')

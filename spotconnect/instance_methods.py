@@ -13,6 +13,7 @@ MIT License 2020
 """
 
 import sys
+import os
 import boto3
 from spotconnect import ec2_methods, sutils, interactive
 
@@ -128,9 +129,9 @@ def upload_to_ec2(instance, user_name, files, remote_dir='.', kp_dir=None, verbo
     try:
         for f in files:
             if verbose:
-                print('Uploading %s' % str(f.split('\\')[-1]))
-            stfp.put(f, remote_dir + '/' + f.split('\\')
-                     [-1], callback=sutils.printTotals, confirm=True)
+                print('Uploading %s' % str(os.path.basename(f)))
+            stfp.put(f, os.path.join(remote_dir, os.path.basename(f)),
+                     callback=sutils.printTotals, confirm=True)
 
     except Exception as e:
         raise e

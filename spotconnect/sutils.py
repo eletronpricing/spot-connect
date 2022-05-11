@@ -73,7 +73,7 @@ def load_profiles():
     '''Load the profiles from the package profile.txt file'''
 
     profile = [f for f in list(absoluteFilePaths(
-        pull_root() + '/data/')) if f.split('\\')[-1] == 'profiles.txt'][0]
+        os.path.join(pull_root(), 'data'))) if os.path.basename(f) == 'profiles.txt'][0]
 
     with open(profile, 'r') as f:
         profiles = ast.literal_eval(f.read())
@@ -86,7 +86,7 @@ def load_profiles():
 def save_profiles(profiles):
     '''Save the profile dict str in a .txt file'''
     profile_file = [f for f in list(absoluteFilePaths(
-        pull_root() + '/data/')) if f.split('\\')[-1] == 'profiles.txt'][0]
+        os.path.join(pull_root(), 'data'))) if os.path.basename(f) == 'profiles.txt'][0]
 
     # ptosave = ast.literal_eval(profile_str)
     print(profile_file)
@@ -152,7 +152,7 @@ def printTotals(transferred, toBeTransferred):
 def get_package_kp_dir():
     '''Get the key-pair directory'''
     kpfile = [f for f in list(absoluteFilePaths(
-        pull_root() + '/data/')) if f.split('\\')[-1] == 'key_pair_default_dir.txt'][0]
+        os.path.join(pull_root(), 'data'))) if os.path.basename(f) == 'key_pair_default_dir.txt'][0]
     with open(kpfile, 'r') as f:
         default_path = f.read()
         f.close()
@@ -168,7 +168,7 @@ def get_default_kp_dir():
 def set_default_kp_dir(directory: str):
     '''Set the default key pair directory'''
     kpfile = [f for f in list(absoluteFilePaths(
-        pull_root() + '/data/')) if f.split('\\')[-1] == 'key_pair_default_dir.txt'][0]
+        os.path.join(pull_root(), 'data'))) if os.path.basename(f) == 'key_pair_default_dir.txt'][0]
     with open(kpfile, 'w') as f:
         f.write(directory)
         f.close()
@@ -783,9 +783,9 @@ username_dictionary = {'Linux': 'ec2-user',
                        'Ubuntu': 'ubuntu',
                        'Windows': 'ec2-user'}
 
-spot_instance_pricing = pd.read_csv(
-    pull_root() + '/data/spot_instance_pricing.csv')
-ami_data = pd.read_csv(pull_root() + '/data/ami_data.csv')
+spot_instance_pricing = pd.read_csv(os.path.join(
+    pull_root(), 'data', 'spot_instance_pricing.csv'))
+ami_data = pd.read_csv(os.path.join(pull_root(), 'data', 'ami_data.csv'))
 ami_data['username'] = ami_data['image_name'].apply(lambda s: find_username(s))
 
 

@@ -47,23 +47,26 @@ def run_script(instance, user_name, script, cmd=True, port=22, kp_dir=None, retu
 
     # Execute a command or .sh script (unix or linux console)
     session.exec_command(commands)
-    # Collect the output
-    stdout = session.makefile()
 
     try:
+
         if return_output:
             output = ''
 
-        for line in stdout:
-            if return_output:
-                output += line.rstrip() + '\n'
-            else:
-                # Show the output
-                print(line.rstrip(), flush=True)
+            # Collect the output
+            stdout = session.makefile()
+
+            for line in stdout:
+                if return_output:
+                    output += line.rstrip() + '\n'
+                else:
+                    # Show the output
+                    print(line.rstrip(), flush=True)
 
     except (KeyboardInterrupt, SystemExit):
         # Keyboard interrupt
         print(sys.stderr, 'Ctrl-C, stopping', flush=True)
+
     # Close the connection
     client.close()
 

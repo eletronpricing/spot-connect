@@ -663,7 +663,7 @@ def update_ami_images(regiao='us-east-1'):
         regiao (str, optional): string com nome da regiao que contem as imagens. Defaults to 'us-east-1'.
     """
 
-    ami_file_path = 'spot_connect/data/ami_data.csv'
+    ami_file_path = f'spotconnect/data/ami_data_{regiao}.csv'
 
     lista_filtro = ['DECOMP', 'NEWAVE']
 
@@ -735,7 +735,7 @@ def get_ec2_instance_region_avgprice(instance_type, regiao='us-east-1'):
 
 def update_instance_list(region_name='us-east-1'):
 
-    instance_file_path = 'spot_connect/data/spot_instance_pricing.csv'
+    instance_file_path = f'spotconnect/data/spot_instance_pricing_{region_name}.csv'
 
     lista_tipos = ['c5', 'c6i.', 'm5.']
 
@@ -755,7 +755,7 @@ def update_instance_list(region_name='us-east-1'):
 
 def update_instance_list_full(region_name='us-east-1'):
 
-    instance_file_path = 'spot_connect/data/spot_instance_pricing.csv'
+    instance_file_path = 'spotconnect/data/spot_instance_pricing.csv'
 
     lista_instancia = sorted(get_ec2_instance_types(region_name))
 
@@ -769,13 +769,48 @@ def update_instance_list_full(region_name='us-east-1'):
             i = i + 1
 
 
-def update_listas(region_name='us-east-1'):
+def update_listas():
 
-    print('atualizando lista de imagens...')
-    update_ami_images(region_name)
+    lista_regioes = ['us-east-1', 'us-east-2', 'us-west-1', 'us-west-2']
+    data_path = 'spotconnect/data'
 
-    print('atualizando lista de instancias e precos medios...')
-    update_instance_list(region_name)
+    for region_name in lista_regioes:
+
+        print(f'atualizando lista de imagens para a regiao {region_name}...')
+        update_ami_images(region_name)
+
+        print(
+            f'atualizando lista de instancias e precos medios para a regiao {region_name}...')
+        update_instance_list(region_name)
+
+    print('consolidando dados...')
+
+    # constroi lista de arquivos com listas individuais por regiao
+    lista_ami = sorted(glob.glob(os.path.join(data_path, "ami_data_*")))
+    lista_instancias = glob.glob(os.path.join(
+        data_path, "spot_instance_pricing_*"))
+
+    # cria dataframe unico com lista de imagens
+    df_append_ami = pd.DataFrame()
+    for item_ami in lista_ami:
+        df_ami = pd.read_csv(item_ami)
+        df_append_ami = df_append_ami.append(df_ami, ignore_index=True)
+    df_append_ami = df_append_ami.rename(columns={'Unnamed: 0': ''})
+
+    # cria dataframe unico com lista de instancias
+    df_append_instancia = pd.DataFrame()
+    for item_instancia in lista_instancias:
+        df_instancia = pd.read_csv(item_instancia)
+        df_append_instancia = df_append_instancia.append(
+            df_instancia, ignore_index=True)
+    df_append_instancia = df_append_instancia.rename(
+        columns={'Unnamed: 0': ''})
+
+    # salva em csv
+    df_append_ami.to_csv(os.path.join(
+        data_path, 'ami_data.csv'), index=False)
+    df_append_instancia.to_csv(os.path.join(
+        data_path, 'spot_instance_pricing.csv'), index=False)
 
     print('finalizado!')
 
@@ -792,8 +827,9 @@ ami_data['username'] = ami_data['image_name'].apply(lambda s: find_username(s))
 
 
 if __name__ == '__main__':
-    print(get_package_kp_dir())
-    # update_ami_images()
+    # select_region()
+    # print(get_package_kp_dir())
+    update_listas()
     # update_instance_list_full()
     # print(select_availability_zone_by_price('c6i.32xlarge'))
     # print(get_price('c5.24xlarge', regiao='us-east-1', azone_code='a'))

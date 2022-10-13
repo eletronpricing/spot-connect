@@ -748,7 +748,7 @@ def update_instance_list(region_name='us-east-1'):
         f.write(',instance_type,vcpus,linux_price,windows_price,region\n')
         for ec2_type in lista_instancia:
             for item in lista_tipos:
-                if item in ec2_type[0] and ec2_type[1] > 40 and 'metal' not in ec2_type[0]:
+                if item in ec2_type[0] and ec2_type[1] > 40 not in ec2_type[0]:
                     f.write(str(i) + ',' + ec2_type[0] + ',' + str(ec2_type[1]) + ',' + '$' +
                             str(get_ec2_instance_region_avgprice(ec2_type[0], region_name)) + ',' + 'N/A*' + ',' + region_name + '\n')
                     i = i + 1

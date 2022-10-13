@@ -663,7 +663,7 @@ def update_ami_images(regiao='us-east-1'):
         regiao (str, optional): string com nome da regiao que contem as imagens. Defaults to 'us-east-1'.
     """
 
-    ami_file_path = f'spotconnect/data/ami_data_{regiao}.csv'
+    ami_file_path = os.path.join(root, 'data', f'ami_data_{regiao}.csv')
 
     lista_filtro = ['DECOMP', 'NEWAVE']
 
@@ -735,7 +735,8 @@ def get_ec2_instance_region_avgprice(instance_type, regiao='us-east-1'):
 
 def update_instance_list(region_name='us-east-1'):
 
-    instance_file_path = f'spotconnect/data/spot_instance_pricing_{region_name}.csv'
+    instance_file_path = os.path.join(
+        root, 'data', f'spot_instance_pricing_{region_name}.csv')
 
     lista_tipos = ['c5', 'c6i.', 'm5.']
 
@@ -755,7 +756,7 @@ def update_instance_list(region_name='us-east-1'):
 
 def update_instance_list_full(region_name='us-east-1'):
 
-    instance_file_path = 'spotconnect/data/spot_instance_pricing.csv'
+    instance_file_path = os.path.join(root, 'data/spot_instance_pricing.csv')
 
     lista_instancia = sorted(get_ec2_instance_types(region_name))
 
@@ -772,7 +773,7 @@ def update_instance_list_full(region_name='us-east-1'):
 def update_listas():
 
     lista_regioes = ['us-east-1', 'us-east-2', 'us-west-1', 'us-west-2']
-    data_path = 'spotconnect/data'
+    data_path = os.path.join(root, 'data')
 
     for region_name in lista_regioes:
 
@@ -829,7 +830,8 @@ ami_data['username'] = ami_data['image_name'].apply(lambda s: find_username(s))
 if __name__ == '__main__':
     # select_region()
     # print(get_package_kp_dir())
-    update_listas()
+    print(root)
+    # update_listas()
     # update_instance_list_full()
     # print(select_availability_zone_by_price('c6i.32xlarge'))
     # print(get_price('c5.24xlarge', regiao='us-east-1', azone_code='a'))

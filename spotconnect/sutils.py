@@ -611,7 +611,7 @@ def select_availability_zone_by_price(instance_type, regiao='us-east-1'):
         max) == df['Timestamp']
 
     df_idx = df[idx][['Regiao', 'Preco']]
-    lista_zonas = ['a', 'b', 'c', 'd', 'f']
+    lista_zonas = list(df_idx['Regiao'].str.replace(regiao, ''))
     check_zona = True
 
     while check_zona:
@@ -772,7 +772,8 @@ def update_instance_list_full(region_name='us-east-1'):
 
 def update_listas():
 
-    lista_regioes = ['us-east-1', 'us-east-2', 'us-west-1', 'us-west-2']
+    lista_regioes = ['us-east-1', 'us-east-2',
+                     'us-west-1', 'us-west-2', 'ca-central-1']
     data_path = os.path.join(root, 'data')
 
     for region_name in lista_regioes:
@@ -828,11 +829,13 @@ ami_data['username'] = ami_data['image_name'].apply(lambda s: find_username(s))
 
 
 if __name__ == '__main__':
+
+    select_availability_zone_by_price('c5.18xlarge', 'us-east-2')
     # select_region()
     # print(get_package_kp_dir())
-    print(root)
+    # print(root)
     # update_listas()
     # update_instance_list_full()
     # print(select_availability_zone_by_price('c6i.32xlarge'))
     # print(get_price('c5.24xlarge', regiao='us-east-1', azone_code='a'))
-    #select_instance_type_filter(region='us-east-1', cpu_min=40, cpu_max=40)
+    # select_instance_type_filter(region='us-east-1', cpu_min=40, cpu_max=40)

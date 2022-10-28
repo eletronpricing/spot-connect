@@ -1,3 +1,10 @@
 ,image_name,image_id,region
 0,NEWAVE v27.4.16 em 2022-04-29,ami-0bb7ec40ede212e40,us-east-1
 1,DECOMP v31 em 2022-03-14,ami-0c07c6b9bd9a5f12a,us-east-1
+2,NEWAVE v28.0.3 em 2022-08-03,ami-01f4177ad291c3dfd,us-east-1
+0,NEWAVE v28.0.3 em 2022-08-03,ami-0ce1f946f5ca68ed7,us-east-2
+1,DECOMP v31 em 2022-03-14,ami-06520b3bc10914e6c,us-east-2
+0,NEWAVE v28.0.3 em 2022-08-03,ami-04ccbd446b30eae82,us-west-1
+1,DECOMP v31 em 2022-03-14,ami-0842e9ffe5932de0d,us-west-1
+0,DECOMP v31 em 2022-03-14,ami-0dbcfeb3fe7bccf0e,us-west-2
+1,NEWAVE v28.0.3 em 2022-08-03,ami-0fdc5f4dacd557e6e,us-west-2

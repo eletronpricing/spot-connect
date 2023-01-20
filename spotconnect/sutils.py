@@ -630,7 +630,7 @@ def select_availability_zone_by_price(instance_type, regiao='us-east-1'):
             print(f'\nA zona deve ser uma letra no intervalo {lista_zonas}\n')
 
 
-def print_ami_images_online(regiao='us-east-1'):
+def print_ami_images_online(lista_filtro = '', regiao='us-east-1'):
     """printa na tela uma lista das imagens disponiveis na regiao informada
 
     Args:
@@ -640,15 +640,18 @@ def print_ami_images_online(regiao='us-east-1'):
     ec2_client = boto3.client('ec2', region_name=regiao)
     images = ec2_client.describe_images(Owners=['self'])
 
-    lista_filtro = ['DECOMP', 'NEWAVE']
-
     results = []
 
     for image in images["Images"]:
-        for item in lista_filtro:
-            if item in image["Name"]:
-                results.append((image["Name"],
-                                image["ImageId"]))
+        if lista_filtro == '':
+
+            results.append((image["Name"],
+                            image["ImageId"]))
+        else:
+            for item in lista_filtro:
+                if item in image["Name"]:
+                    results.append((image["Name"],
+                                    image["ImageId"]))
 
     df = pd.DataFrame(results, columns=['Name', 'ImageId'])
     df = df.sort_values('Name')
@@ -665,8 +668,6 @@ def update_ami_images(regiao='us-east-1'):
 
     ami_file_path = os.path.join(root, 'data', f'ami_data_{regiao}.csv')
 
-    lista_filtro = ['DECOMP', 'NEWAVE']
-
     ec2_client = boto3.client('ec2', region_name=regiao)
     images = ec2_client.describe_images(Owners=['self'])
 
@@ -675,11 +676,9 @@ def update_ami_images(regiao='us-east-1'):
     with open(ami_file_path, 'w') as f:
         f.write(',image_name,image_id,region\n')
         for image in images["Images"]:
-            for item in lista_filtro:
-                if item in image["Name"]:
-                    f.write(str(i) + ',' + image["Name"] + ',' +
-                            image["ImageId"] + ',' + regiao + '\n')
-                    i = i + 1
+            f.write(str(i) + ',' + image["Name"] + ',' +
+                    image["ImageId"] + ',' + regiao + '\n')
+            i = i + 1
 
 
 def get_ec2_instance_types(region_name='us-east-1'):
@@ -830,7 +829,7 @@ ami_data['username'] = ami_data['image_name'].apply(lambda s: find_username(s))
 
 if __name__ == '__main__':
 
-    select_availability_zone_by_price('c5.18xlarge', 'us-east-2')
+    # select_availability_zone_by_price('c5.18xlarge', 'us-east-2')
     # select_region()
     # print(get_package_kp_dir())
     # print(root)
@@ -839,3 +838,5 @@ if __name__ == '__main__':
     # print(select_availability_zone_by_price('c6i.32xlarge'))
     # print(get_price('c5.24xlarge', regiao='us-east-1', azone_code='a'))
     # select_instance_type_filter(region='us-east-1', cpu_min=40, cpu_max=40)
+
+    print_ami_images_online()

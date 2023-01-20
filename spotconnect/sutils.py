@@ -314,7 +314,7 @@ def select_instance_type(region='us-east-1'):
     return instance_name, instance_cpu
 
 
-def select_image(region='us-east-1'):
+def select_image(region='us-east-1', string_filtro=''):
 
     results = []
 
@@ -322,11 +322,13 @@ def select_image(region='us-east-1'):
 
     for i, r in enumerate(image_list):
 
-        results.append({
-            'indice': i,
-            'imagem': r
-        }
-        )
+        if string_filtro.lower() in r.lower():
+
+            results.append({
+                'indice': i,
+                'imagem': r
+            }
+            )
 
     df = pd.DataFrame(results)
 
@@ -839,4 +841,12 @@ if __name__ == '__main__':
     # print(get_price('c5.24xlarge', regiao='us-east-1', azone_code='a'))
     # select_instance_type_filter(region='us-east-1', cpu_min=40, cpu_max=40)
 
-    print_ami_images_online()
+    #print_ami_images_online()
+
+    update_ami_images()
+    a, b,c =select_image('us-east-1', 'com')
+    print(a)
+    print(b)
+    print(c)
+
+

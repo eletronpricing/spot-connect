@@ -739,7 +739,7 @@ def update_instance_list(region_name='us-east-1'):
     instance_file_path = os.path.join(
         root, 'data', f'spot_instance_pricing_{region_name}.csv')
 
-    lista_tipos = ['c5', 'c6i.', 'm5.']
+    lista_tipos = ['c4', 'c5', 'c6i.', 'm5.']
 
     lista_instancia = sorted(get_ec2_instance_types(region_name))
 
@@ -749,7 +749,7 @@ def update_instance_list(region_name='us-east-1'):
         f.write(',instance_type,vcpus,linux_price,windows_price,region\n')
         for ec2_type in lista_instancia:
             for item in lista_tipos:
-                if item in ec2_type[0] and ec2_type[1] > 40:
+                if item in ec2_type[0] and ec2_type[1] > 8:
                     f.write(str(i) + ',' + ec2_type[0] + ',' + str(ec2_type[1]) + ',' + '$' +
                             str(get_ec2_instance_region_avgprice(ec2_type[0], region_name)) + ',' + 'N/A*' + ',' + region_name + '\n')
                     i = i + 1
@@ -835,18 +835,18 @@ if __name__ == '__main__':
     # select_region()
     # print(get_package_kp_dir())
     # print(root)
-    # update_listas()
-    # update_instance_list_full()
+    update_listas()
+    # update_instance_list()
     # print(select_availability_zone_by_price('c6i.32xlarge'))
     # print(get_price('c5.24xlarge', regiao='us-east-1', azone_code='a'))
     # select_instance_type_filter(region='us-east-1', cpu_min=40, cpu_max=40)
 
     #print_ami_images_online()
 
-    update_ami_images()
-    a, b,c =select_image('us-east-1', 'com')
-    print(a)
-    print(b)
-    print(c)
+    # update_ami_images()
+    # a, b,c =select_image('us-east-1', 'com')
+    # print(a)
+    # print(b)
+    # print(c)
 
 

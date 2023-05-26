@@ -163,7 +163,7 @@ def launch_instance(name='', instanceid='', keypair='', keypair_dir='', security
     for script in profile['scripts'] + scripts_to_run:
         print('\nExecuting script "%s"...' % str(script))
         try:
-            if not instance_methods.run_script(instance, profile['username'], script):
+            if not instance_methods.run_script(instance, profile['username'], script, kp_dir=kp_dir):
                 break
         except Exception as e:
             print(str(e))

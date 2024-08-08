@@ -739,7 +739,7 @@ def update_instance_list(region_name='us-east-1'):
     instance_file_path = os.path.join(
         root, 'data', f'spot_instance_pricing_{region_name}.csv')
 
-    lista_tipos = ['c4', 'c5', 'c6i.', 'm5.']
+    lista_tipos = ['c4', 'c5', 'c6i.', 'm5.', 'm6.']
 
     lista_instancia = sorted(get_ec2_instance_types(region_name))
 

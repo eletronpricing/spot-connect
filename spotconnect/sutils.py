@@ -632,7 +632,7 @@ def select_availability_zone_by_price(instance_type, regiao='us-east-1'):
             print(f'\nA zona deve ser uma letra no intervalo {lista_zonas}\n')
 
 
-def print_ami_images_online(lista_filtro = '', regiao='us-east-1'):
+def print_ami_images_online(lista_filtro='', regiao='us-east-1'):
     """printa na tela uma lista das imagens disponiveis na regiao informada
 
     Args:
@@ -739,7 +739,7 @@ def update_instance_list(region_name='us-east-1'):
     instance_file_path = os.path.join(
         root, 'data', f'spot_instance_pricing_{region_name}.csv')
 
-    lista_tipos = ['c4', 'c5', 'c6i.', 'm5.', 'm6i.']
+    lista_tipos = ['c4', 'c5', 'c6i.', 'c7i.', 'm5.', 'm6i.']
 
     lista_instancia = sorted(get_ec2_instance_types(region_name))
 
@@ -841,12 +841,10 @@ if __name__ == '__main__':
     # print(get_price('c5.24xlarge', regiao='us-east-1', azone_code='a'))
     # select_instance_type_filter(region='us-east-1', cpu_min=40, cpu_max=40)
 
-    #print_ami_images_online()
+    # print_ami_images_online()
 
     # update_ami_images()
     # a, b,c =select_image('us-east-1', 'com')
     # print(a)
     # print(b)
     # print(c)
-
-

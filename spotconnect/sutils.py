@@ -797,15 +797,17 @@ def update_listas():
     df_append_ami = pd.DataFrame()
     for item_ami in lista_ami:
         df_ami = pd.read_csv(item_ami)
-        df_append_ami = df_append_ami.append(df_ami, ignore_index=True)
+        # df_append_ami = df_append_ami.append(df_ami, ignore_index=True)
+        df_append_ami = pd.concat([df_append_ami, df_ami])
     df_append_ami = df_append_ami.rename(columns={'Unnamed: 0': ''})
 
     # cria dataframe unico com lista de instancias
     df_append_instancia = pd.DataFrame()
     for item_instancia in lista_instancias:
         df_instancia = pd.read_csv(item_instancia)
-        df_append_instancia = df_append_instancia.append(
-            df_instancia, ignore_index=True)
+        # df_append_instancia = df_append_instancia.append(
+        #     df_instancia, ignore_index=True)
+        df_append_instancia = pd.concat([df_append_instancia, df_instancia])
     df_append_instancia = df_append_instancia.rename(
         columns={'Unnamed: 0': ''})
 

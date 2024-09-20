@@ -773,8 +773,7 @@ def update_instance_list_full(region_name='us-east-1'):
 
 def update_listas():
 
-    lista_regioes = ['us-east-1', 'us-east-2',
-                     'us-west-1', 'us-west-2', 'ca-central-1']
+    lista_regioes = ['us-east-1', 'us-east-2', 'us-west-1', 'us-west-2']
     data_path = os.path.join(root, 'data')
 
     for region_name in lista_regioes:

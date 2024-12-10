@@ -30,6 +30,9 @@ from tabulate import tabulate
 
 root = Path(os.path.dirname(os.path.abspath(__file__)))
 
+lista_regioes = ['us-east-1', 'us-east-2', 'us-west-1', 'us-west-2']
+lista_tipos = ['c4', 'c5', 'c6i.', 'c7i.', 'm5.', 'm6i.', 'c6a', 'r6i', 'r6a']
+
 
 def full_pickle(title, data):
     '''pickles the submited data and titles it'''
@@ -739,9 +742,6 @@ def update_instance_list(region_name='us-east-1'):
     instance_file_path = os.path.join(
         root, 'data', f'spot_instance_pricing_{region_name}.csv')
 
-    lista_tipos = ['c4', 'c5', 'c6i.', 'c7i.',
-                   'm5.', 'm6i.', 'c6a', 'r6i', 'r6a']
-
     lista_instancia = sorted(get_ec2_instance_types(region_name))
 
     i = 0
@@ -772,9 +772,37 @@ def update_instance_list_full(region_name='us-east-1'):
             i = i + 1
 
 
+def update_imagens():
+
+    data_path = os.path.join(root, 'data')
+
+    for region_name in lista_regioes:
+
+        print(f'atualizando lista de imagens para a regiao {region_name}...')
+        update_ami_images(region_name)
+
+    print('consolidando dados...')
+
+    # constroi lista de arquivos com listas individuais por regiao
+    lista_ami = sorted(glob.glob(os.path.join(data_path, "ami_data_*")))
+
+    # cria dataframe unico com lista de imagens
+    df_append_ami = pd.DataFrame()
+    for item_ami in lista_ami:
+        df_ami = pd.read_csv(item_ami)
+        # df_append_ami = df_append_ami.append(df_ami, ignore_index=True)
+        df_append_ami = pd.concat([df_append_ami, df_ami])
+    df_append_ami = df_append_ami.rename(columns={'Unnamed: 0': ''})
+
+    # salva em csv
+    df_append_ami.to_csv(os.path.join(
+        data_path, 'ami_data.csv'), index=False)
+
+    print('finalizado!')
+
+
 def update_listas():
 
-    lista_regioes = ['us-east-1', 'us-east-2', 'us-west-1', 'us-west-2']
     data_path = os.path.join(root, 'data')
 
     for region_name in lista_regioes:
